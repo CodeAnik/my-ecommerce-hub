@@ -5,12 +5,12 @@ import { DashboardSidebar } from "./DashboardSidebar";
 import { MobileBottomNav } from "./MobileBottomNav";
 
 export function DashboardLayout() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, role } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  // Non-customer roles should use the admin panel
+  if (role && role !== "customer") return <Navigate to="/admin" replace />;
 
   return (
     <div className="flex min-h-screen w-full">

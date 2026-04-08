@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Store, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, Store, Mail, Lock, Info } from "lucide-react";
 import { toast } from "sonner";
 
 export default function LoginPage() {
-  const { login, isLoading, isAuthenticated } = useAuth();
+  const { login, isLoading, isAuthenticated, role } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,7 +17,8 @@ export default function LoginPage() {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   if (isAuthenticated) {
-    navigate("/dashboard", { replace: true });
+    const target = role === "customer" ? "/dashboard" : "/admin";
+    navigate(target, { replace: true });
     return null;
   }
 
@@ -37,7 +38,7 @@ export default function LoginPage() {
     const ok = await login(email, password);
     if (ok) {
       toast.success("Welcome back!");
-      navigate("/dashboard");
+      navigate("/redirect");
     } else {
       toast.error("Invalid credentials");
     }
@@ -74,6 +75,19 @@ export default function LoginPage() {
           <div className="text-center lg:text-left">
             <h1 className="text-2xl font-bold tracking-tight">Sign in to your account</h1>
             <p className="text-sm text-muted-foreground mt-1">Enter your credentials to access your dashboard</p>
+          </div>
+
+          {/* Demo role hint */}
+          <div className="bg-info/10 border border-info/20 rounded-lg p-3 flex items-start gap-2">
+            <Info className="h-4 w-4 text-info mt-0.5 shrink-0" />
+            <div className="text-xs text-muted-foreground space-y-0.5">
+              <p className="font-semibold text-foreground">Demo Login Hints:</p>
+              <p><strong>Customer:</strong> any email (e.g. sarah@example.com)</p>
+              <p><strong>Admin:</strong> email with "admin" (e.g. admin@store.com)</p>
+              <p><strong>Editor:</strong> email with "editor" (e.g. editor@store.com)</p>
+              <p><strong>Manager:</strong> email with "manager" (e.g. manager@store.com)</p>
+              <p className="text-muted-foreground">Any password with 6+ chars</p>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
