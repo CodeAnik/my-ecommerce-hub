@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { mockCustomer, WooCustomer } from '@/data/mock-data';
+import { mockCustomer, mockAdmin, mockEditor, mockShopManager, WooCustomer, UserRole, rolePermissions } from '@/data/mock-data';
 
 /**
  * Auth context for WooCommerce customer dashboard.
@@ -10,6 +10,8 @@ import { mockCustomer, WooCustomer } from '@/data/mock-data';
 interface AuthContextType {
   isAuthenticated: boolean;
   customer: WooCustomer | null;
+  role: UserRole | null;
+  hasPermission: (permission: string) => boolean;
   login: (email: string, password: string) => Promise<boolean>;
   register: (data: { first_name: string; last_name: string; email: string; password: string }) => Promise<boolean>;
   logout: () => void;
@@ -21,11 +23,27 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/** Map login email to a mock user for demo purposes */
+function getUserByEmail(email: string): WooCustomer {
+  const e = email.toLowerCase().trim();
+  if (e.includes('admin') || e === 'james@mystore.com') return mockAdmin;
+  if (e.includes('editor') || e === 'emily@mystore.com') return mockEditor;
+  if (e.includes('manager') || e === 'david@mystore.com') return mockShopManager;
+  return mockCustomer;
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [customer, setCustomer] = useState<WooCustomer | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const role = customer?.role ?? null;
+
+  const hasPermission = useCallback((permission: string) => {
+    if (!role) return false;
+    return rolePermissions[role]?.includes(permission) ?? false;
+  }, [role]);
 
   const toggleDarkMode = useCallback(() => {
     setIsDarkMode(prev => {
@@ -35,12 +53,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
-  // Replace with wp_ajax or WooCommerce auth endpoint
   const login = useCallback(async (email: string, _password: string) => {
     setIsLoading(true);
     await new Promise(r => setTimeout(r, 1200));
     if (email) {
-      setCustomer(mockCustomer);
+      const user = getUserByEmail(email);
+      setCustomer(user);
       setIsAuthenticated(true);
       setIsLoading(false);
       return true;
@@ -68,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, customer, login, register, logout, updateCustomer, isLoading, isDarkMode, toggleDarkMode }}>
+    <AuthContext.Provider value={{ isAuthenticated, customer, role, hasPermission, login, register, logout, updateCustomer, isLoading, isDarkMode, toggleDarkMode }}>
       {children}
     </AuthContext.Provider>
   );

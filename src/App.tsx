@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { AdminLayout } from "@/components/layout/AdminLayout";
+import { RoleRedirect } from "@/components/auth/RoleRedirect";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
@@ -17,6 +19,12 @@ import AddressesPage from "./pages/AddressesPage";
 import AccountDetailsPage from "./pages/AccountDetailsPage";
 import WishlistPage from "./pages/WishlistPage";
 import SupportPage from "./pages/SupportPage";
+import AdminHome from "./pages/admin/AdminHome";
+import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
+import AdminProductsPage from "./pages/admin/AdminProductsPage";
+import AdminCustomersPage from "./pages/admin/AdminCustomersPage";
+import AdminAnalyticsPage from "./pages/admin/AdminAnalyticsPage";
+import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +42,11 @@ const App = () => (
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+            {/* Role-based redirect after login */}
+            <Route path="/redirect" element={<RoleRedirect />} />
+
+            {/* Customer dashboard - only for customers */}
             <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<DashboardHome />} />
               <Route path="orders" element={<OrdersPage />} />
@@ -44,6 +57,17 @@ const App = () => (
               <Route path="wishlist" element={<WishlistPage />} />
               <Route path="support" element={<SupportPage />} />
             </Route>
+
+            {/* Admin panel - for admin, editor, shop_manager */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminHome />} />
+              <Route path="orders" element={<AdminOrdersPage />} />
+              <Route path="products" element={<AdminProductsPage />} />
+              <Route path="customers" element={<AdminCustomersPage />} />
+              <Route path="analytics" element={<AdminAnalyticsPage />} />
+              <Route path="settings" element={<AdminSettingsPage />} />
+            </Route>
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
