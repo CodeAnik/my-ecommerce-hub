@@ -330,6 +330,30 @@ export const mockRecentlyViewed: WooProduct[] = [
   { id: 303, name: "Desk Organizer Set", price: "32.00", regular_price: "32.00", sale_price: "", image: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=300&h=300&fit=crop", rating: 4.2, category: "Organization" },
 ];
 
+// ─── Coupons ───────────────────────────────────────────────
+export interface WooCoupon {
+  id: number;
+  code: string;
+  description: string;
+  discount_type: "percent" | "fixed_cart" | "fixed_product";
+  amount: string;
+  usage_limit: number | null;
+  usage_count: number;
+  expiry_date: string | null;
+  minimum_amount: string;
+  status: "active" | "disabled";
+  date_created: string;
+}
+
+export const mockCoupons: WooCoupon[] = [
+  { id: 1, code: "SUMMER25", description: "Summer sale 25% off", discount_type: "percent", amount: "25", usage_limit: 500, usage_count: 312, expiry_date: "2026-08-31", minimum_amount: "50", status: "active", date_created: "2026-04-01T00:00:00" },
+  { id: 2, code: "WELCOME10", description: "New customer welcome discount", discount_type: "percent", amount: "10", usage_limit: null, usage_count: 1024, expiry_date: null, minimum_amount: "0", status: "active", date_created: "2025-01-01T00:00:00" },
+  { id: 3, code: "FREESHIP", description: "Free shipping on orders over $75", discount_type: "fixed_cart", amount: "15", usage_limit: 200, usage_count: 189, expiry_date: "2026-06-30", minimum_amount: "75", status: "active", date_created: "2026-02-15T00:00:00" },
+  { id: 4, code: "FLASH50", description: "Flash sale - 50% off select items", discount_type: "percent", amount: "50", usage_limit: 100, usage_count: 100, expiry_date: "2026-03-15", minimum_amount: "0", status: "disabled", date_created: "2026-03-10T00:00:00" },
+  { id: 5, code: "VIP20", description: "VIP members exclusive 20% off", discount_type: "percent", amount: "20", usage_limit: 50, usage_count: 28, expiry_date: "2026-12-31", minimum_amount: "100", status: "active", date_created: "2026-01-01T00:00:00" },
+  { id: 6, code: "SAVE5", description: "$5 off any product", discount_type: "fixed_product", amount: "5", usage_limit: 1000, usage_count: 445, expiry_date: null, minimum_amount: "0", status: "active", date_created: "2025-06-01T00:00:00" },
+];
+
 export const mockFAQs = [
   { question: "How do I track my order?", answer: "You can track your order from the Orders page. Click on any order to see the full tracking timeline and tracking number." },
   { question: "What is your return policy?", answer: "We offer a 30-day return policy for most items. Items must be in original condition and packaging." },

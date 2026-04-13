@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Bell, Moon, Sun, Search } from "lucide-react";
+import { Moon, Sun, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { NotificationCenter } from "./NotificationCenter";
 
 interface DashboardHeaderProps {
   title: string;
@@ -30,10 +31,7 @@ export function DashboardHeader({ title, breadcrumb }: DashboardHeaderProps) {
         <Button variant="ghost" size="icon" className="hidden sm:flex h-9 w-9 text-muted-foreground hover:text-foreground">
           <Search className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground relative">
-          <Bell className="h-4 w-4" />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive" />
-        </Button>
+        <NotificationCenter />
         <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground" onClick={toggleDarkMode}>
           {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>

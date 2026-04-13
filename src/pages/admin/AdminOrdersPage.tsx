@@ -4,7 +4,11 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { mockOrders, OrderStatus } from "@/data/mock-data";
-import { Search, Eye, MoreHorizontal, Printer, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Eye, MoreHorizontal, Printer, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
@@ -22,12 +26,21 @@ const tabs = [
   { label: "Refunded", value: "refunded" },
 ];
 
+const allStatuses: OrderStatus[] = ["pending", "processing", "on-hold", "completed", "cancelled", "refunded"];
+
 export default function AdminOrdersPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<number[]>([]);
+  const [orders, setOrders] = useState(mockOrders);
 
-  const filtered = mockOrders.filter(o => {
+  const handleStatusChange = (orderId: number, newStatus: OrderStatus) => {
+    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+    toast.success(`Order status updated to "${newStatus}"`);
+  };
+
+  const filtered = orders.filter(o => {
     if (activeTab !== "all" && o.status !== activeTab) return false;
     if (search) {
       const s = search.toLowerCase();
@@ -136,7 +149,18 @@ export default function AdminOrdersPage() {
                       <span className="text-muted-foreground">{order.customer_name || "Guest"}</span>
                     </td>
                     <td className="px-3 py-3 text-muted-foreground text-xs">{format(new Date(order.date_created), "MMM d, yyyy")}</td>
-                    <td className="px-3 py-3"><StatusBadge status={order.status} /></td>
+                    <td className="px-3 py-3">
+                      <Select value={order.status} onValueChange={(v) => handleStatusChange(order.id, v as OrderStatus)}>
+                        <SelectTrigger className="h-7 w-[120px] text-[11px] border-dashed">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {allStatuses.map(s => (
+                            <SelectItem key={s} value={s} className="text-xs capitalize">{s.replace("-", " ")}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </td>
                     <td className="px-3 py-3 text-muted-foreground text-xs hidden md:table-cell">{order.payment_method_title.split('(')[0].trim()}</td>
                     <td className="px-3 py-3 text-right font-semibold">${order.total}</td>
                     <td className="px-3 py-3 text-right">
@@ -145,8 +169,8 @@ export default function AdminOrdersPage() {
                           <Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="h-4 w-4" /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem><Eye className="h-3.5 w-3.5 mr-2" /> View Details</DropdownMenuItem>
-                          <DropdownMenuItem><Printer className="h-3.5 w-3.5 mr-2" /> Print Invoice</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => navigate(`/admin/orders/${order.id}`)}><Eye className="h-3.5 w-3.5 mr-2" /> View Details</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => navigate(`/admin/orders/${order.id}`)}><Printer className="h-3.5 w-3.5 mr-2" /> Print Invoice</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
