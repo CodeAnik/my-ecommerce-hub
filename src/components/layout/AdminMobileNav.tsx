@@ -1,5 +1,5 @@
 import { useLocation, Link } from "react-router-dom";
-import { LayoutDashboard, ShoppingBag, Package, BarChart3, MoreHorizontal, Users, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, Package, BarChart3, MoreHorizontal, Users, Settings, LogOut, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,6 +18,7 @@ export function AdminMobileNav() {
 
   const moreItems = [
     hasPermission("manage_customers") && { label: "Customers", icon: Users, path: "/admin/customers" },
+    hasPermission("manage_products") && { label: "Coupons", icon: Tag, path: "/admin/coupons" },
     hasPermission("manage_settings") && { label: "Settings", icon: Settings, path: "/admin/settings" },
   ].filter(Boolean) as { label: string; icon: React.ElementType; path: string }[];
 

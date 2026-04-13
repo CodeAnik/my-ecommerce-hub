@@ -2,7 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLocation, Link } from "react-router-dom";
 import {
   LayoutDashboard, ShoppingBag, Package, Users, BarChart3,
-  Settings, LogOut, ChevronLeft, Store, Shield,
+  Settings, LogOut, ChevronLeft, Store, Shield, Tag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +21,7 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
     { label: "Products", icon: Package, path: "/admin/products", permission: "manage_products" },
     { label: "Customers", icon: Users, path: "/admin/customers", permission: "manage_customers" },
     { label: "Analytics", icon: BarChart3, path: "/admin/analytics", permission: "view_analytics" },
+    { label: "Coupons", icon: Tag, path: "/admin/coupons", permission: "manage_products" },
     { label: "Settings", icon: Settings, path: "/admin/settings", permission: "manage_settings" },
   ].filter(item => item.permission === null || hasPermission(item.permission));
 
