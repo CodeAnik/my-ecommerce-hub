@@ -25,7 +25,7 @@ export default function AdminCustomerDetailPage() {
   }
 
   // Simulate customer orders from admin orders
-  const customerOrders = mockAdminOrders.slice(0, customer.orders > 5 ? 5 : customer.orders);
+  const customerOrders = mockOrders.slice(0, customer.orders > 5 ? 5 : customer.orders);
   const totalSpent = parseFloat(customer.total_spent.replace(",", ""));
   const avgOrderValue = customer.orders > 0 ? (totalSpent / customer.orders).toFixed(2) : "0.00";
   const initials = customer.name.split(" ").map(n => n[0]).join("");
