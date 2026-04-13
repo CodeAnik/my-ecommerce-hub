@@ -5,6 +5,7 @@ import { mockTopCustomers } from "@/data/mock-data";
 import { Search, Mail, Eye } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
+import { Link } from "react-router-dom";
 
 export default function AdminCustomersPage() {
   const [search, setSearch] = useState("");
@@ -73,7 +74,7 @@ export default function AdminCustomersPage() {
                     <td className="px-3 py-3 text-muted-foreground text-xs hidden md:table-cell">{format(new Date(customer.last_order), "MMM d, yyyy")}</td>
                     <td className="px-5 py-3 text-right">
                       <div className="flex gap-1 justify-end">
-                        <Button variant="ghost" size="icon" className="h-7 w-7"><Eye className="h-3.5 w-3.5" /></Button>
+                        <Button asChild variant="ghost" size="icon" className="h-7 w-7"><Link to={`/admin/customers/${customer.id}`}><Eye className="h-3.5 w-3.5" /></Link></Button>
                         <Button variant="ghost" size="icon" className="h-7 w-7"><Mail className="h-3.5 w-3.5" /></Button>
                       </div>
                     </td>
