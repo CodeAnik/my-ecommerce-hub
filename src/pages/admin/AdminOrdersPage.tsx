@@ -4,7 +4,11 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { mockOrders, OrderStatus } from "@/data/mock-data";
-import { Search, Eye, MoreHorizontal, Printer, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Eye, MoreHorizontal, Printer, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
@@ -22,12 +26,21 @@ const tabs = [
   { label: "Refunded", value: "refunded" },
 ];
 
+const allStatuses: OrderStatus[] = ["pending", "processing", "on-hold", "completed", "cancelled", "refunded"];
+
 export default function AdminOrdersPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<number[]>([]);
+  const [orders, setOrders] = useState(mockOrders);
 
-  const filtered = mockOrders.filter(o => {
+  const handleStatusChange = (orderId: number, newStatus: OrderStatus) => {
+    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+    toast.success(`Order status updated to "${newStatus}"`);
+  };
+
+  const filtered = orders.filter(o => {
     if (activeTab !== "all" && o.status !== activeTab) return false;
     if (search) {
       const s = search.toLowerCase();
