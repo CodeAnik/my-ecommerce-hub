@@ -23,6 +23,7 @@ import AdminHome from "./pages/admin/AdminHome";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
 import AdminCustomersPage from "./pages/admin/AdminCustomersPage";
+import AdminCustomerDetailPage from "./pages/admin/AdminCustomerDetailPage";
 import AdminAnalyticsPage from "./pages/admin/AdminAnalyticsPage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import AdminCouponsPage from "./pages/admin/AdminCouponsPage";
@@ -67,6 +68,7 @@ const App = () => (
               <Route path="orders/:id" element={<AdminOrderDetailPage />} />
               <Route path="products" element={<AdminProductsPage />} />
               <Route path="customers" element={<AdminCustomersPage />} />
+              <Route path="customers/:id" element={<AdminCustomerDetailPage />} />
               <Route path="analytics" element={<AdminAnalyticsPage />} />
               <Route path="coupons" element={<AdminCouponsPage />} />
               <Route path="settings" element={<AdminSettingsPage />} />
