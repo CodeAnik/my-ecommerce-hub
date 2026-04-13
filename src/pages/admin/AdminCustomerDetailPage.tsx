@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { mockTopCustomers, mockAdminOrders } from "@/data/mock-data";
+import { mockTopCustomers, mockOrders } from "@/data/mock-data";
 import { ArrowLeft, Mail, Phone, MapPin, Calendar, ShoppingBag, DollarSign, TrendingUp, Package } from "lucide-react";
 import { format } from "date-fns";
 
