@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +10,11 @@ import { toast } from "sonner";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { ProductFormDialog, type ProductFormValue } from "@/components/admin/ProductFormDialog";
 
 const tabs = [
   { label: "All", value: "all" },
@@ -22,8 +26,54 @@ const tabs = [
 export default function AdminProductsPage() {
   const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
+  const [products, setProducts] = useState(mockStoreProducts);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<Partial<ProductFormValue> | null>(null);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
-  const filtered = mockStoreProducts.filter(p => {
+  const openCreate = () => { setEditing(null); setFormOpen(true); };
+  const openEdit = (p: typeof products[0]) => {
+    setEditing({
+      id: p.id, name: p.name, slug: (p as any).slug || "", sku: p.sku,
+      description: (p as any).description || "", short_description: (p as any).short_description || "",
+      regular_price: p.regular_price, sale_price: p.sale_price || "",
+      category: p.category, brand: (p as any).brand || "",
+      stock_quantity: p.stock_quantity ?? 0, stock_status: p.stock_status as any,
+      status: p.status as any, featured_image: p.image, gallery: (p as any).gallery || [],
+      meta_title: (p as any).meta_title || "", meta_description: (p as any).meta_description || "",
+      meta_keywords: (p as any).meta_keywords || "",
+    });
+    setFormOpen(true);
+  };
+
+  const handleSubmit = (val: ProductFormValue) => {
+    if (val.id) {
+      setProducts(prev => prev.map(p => p.id === val.id ? {
+        ...p, name: val.name, sku: val.sku, price: val.sale_price || val.regular_price,
+        regular_price: val.regular_price, sale_price: val.sale_price, category: val.category,
+        stock_quantity: val.stock_quantity, stock_status: val.stock_status, status: val.status,
+        image: val.featured_image || p.image, ...(val as any),
+      } as any : p));
+    } else {
+      const id = Math.max(...products.map(p => p.id)) + 1;
+      setProducts(prev => [{
+        id, name: val.name, sku: val.sku, price: val.sale_price || val.regular_price,
+        regular_price: val.regular_price, sale_price: val.sale_price, image: val.featured_image || "/placeholder.svg",
+        rating: 0, category: val.category, stock_status: val.stock_status, stock_quantity: val.stock_quantity,
+        status: val.status, total_sales: 0, date_created: new Date().toISOString().split("T")[0],
+        ...(val as any),
+      } as any, ...prev]);
+    }
+  };
+
+  const handleDelete = () => {
+    if (deleteId == null) return;
+    setProducts(prev => prev.filter(p => p.id !== deleteId));
+    toast.success("Product deleted");
+    setDeleteId(null);
+  };
+
+  const filtered = products.filter(p => {
     if (activeTab !== "all" && p.status !== activeTab) return false;
     if (search) {
       const s = search.toLowerCase();
@@ -59,7 +109,7 @@ export default function AdminProductsPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Search products..." className="pl-9 h-9" value={search} onChange={e => setSearch(e.target.value)} />
             </div>
-            <Button size="sm" className="gradient-primary text-primary-foreground h-9" onClick={() => toast.info("Product creation modal would open here")}>
+            <Button size="sm" className="gradient-primary text-primary-foreground h-9" onClick={openCreate}>
               <Plus className="h-4 w-4 mr-1" /> Add Product
             </Button>
           </div>
@@ -120,9 +170,9 @@ export default function AdminProductsPage() {
                           <Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="h-4 w-4" /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem><Eye className="h-3.5 w-3.5 mr-2" /> View</DropdownMenuItem>
-                          <DropdownMenuItem><Edit2 className="h-3.5 w-3.5 mr-2" /> Edit</DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive"><Trash2 className="h-3.5 w-3.5 mr-2" /> Delete</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openEdit(product)}><Eye className="h-3.5 w-3.5 mr-2" /> View</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openEdit(product)}><Edit2 className="h-3.5 w-3.5 mr-2" /> Edit</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive" onClick={() => setDeleteId(product.id)}><Trash2 className="h-3.5 w-3.5 mr-2" /> Delete</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
@@ -141,6 +191,21 @@ export default function AdminProductsPage() {
           </div>
         </div>
       </div>
+
+      <ProductFormDialog open={formOpen} onOpenChange={setFormOpen} initial={editing} onSubmit={handleSubmit} />
+
+      <AlertDialog open={deleteId !== null} onOpenChange={o => !o && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this product?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone. The product will be permanently removed from your store.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
