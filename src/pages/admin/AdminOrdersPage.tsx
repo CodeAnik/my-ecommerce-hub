@@ -23,6 +23,13 @@ const tabs = [
 ];
 
 const allStatuses: OrderStatus[] = ["pending", "processing", "on-hold", "completed", "cancelled", "refunded"];
+const paymentMethods = ["all", "Credit Card", "PayPal", "Bank Transfer"];
+const dateRanges = [
+  { label: "All Time", value: "all" },
+  { label: "Today", value: "today" },
+  { label: "Last 7 days", value: "7d" },
+  { label: "Last 30 days", value: "30d" },
+];
 
 export default function AdminOrdersPage() {
   const navigate = useNavigate();
@@ -30,6 +37,11 @@ export default function AdminOrdersPage() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<number[]>([]);
   const [orders, setOrders] = useState(mockOrders);
+  const [showFilters, setShowFilters] = useState(false);
+  const [paymentFilter, setPaymentFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
+  const [minTotal, setMinTotal] = useState("");
+  const [maxTotal, setMaxTotal] = useState("");
 
   const handleStatusChange = (orderId: number, newStatus: OrderStatus) => {
     setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
