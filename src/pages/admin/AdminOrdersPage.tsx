@@ -1,19 +1,15 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { mockOrders, OrderStatus } from "@/data/mock-data";
-import { Search, Eye, MoreHorizontal, Printer, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { Search, Eye, Printer, ChevronLeft, ChevronRight, Filter, X, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
 const tabs = [
