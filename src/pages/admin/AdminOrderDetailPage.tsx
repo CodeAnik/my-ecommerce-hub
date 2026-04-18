@@ -350,7 +350,7 @@ export default function AdminOrderDetailPage() {
                   </div>
                 </div>
 
-                <div style={{ position: "absolute", bottom: 40, left: 64, right: 64, borderTop: "1px solid #e5e5e5", paddingTop: 16, textAlign: "center", color: "#888", fontSize: 10 }}>
+                <div style={{ marginTop: "auto", paddingTop: 32, borderTop: "1px solid #e5e5e5", textAlign: "center", color: "#888", fontSize: 10 }}>
                   Thank you for your business! For questions about this invoice, contact support@mystore.com
                   <br />
                   MyStore Inc. · Invoice generated on {format(new Date(), "MMM d, yyyy 'at' h:mm a")}
