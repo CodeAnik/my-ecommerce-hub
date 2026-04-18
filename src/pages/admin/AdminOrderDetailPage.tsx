@@ -207,78 +207,139 @@ export default function AdminOrderDetailPage() {
 
       {/* Invoice Modal */}
       <Dialog open={invoiceOpen} onOpenChange={setInvoiceOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[860px] w-[95vw] max-h-[92vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              Invoice {order.number}
+            <DialogTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <span>Invoice {order.number} <span className="text-xs font-normal text-muted-foreground">· A4 PDF</span></span>
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" onClick={printInvoice}><Printer className="h-3.5 w-3.5 mr-1.5" /> Print</Button>
-                <Button size="sm" className="gradient-primary text-primary-foreground" onClick={downloadInvoice}><Download className="h-3.5 w-3.5 mr-1.5" /> Download</Button>
+                <Button size="sm" className="gradient-primary text-primary-foreground" onClick={downloadInvoice}><Download className="h-3.5 w-3.5 mr-1.5" /> Download PDF</Button>
               </div>
             </DialogTitle>
           </DialogHeader>
 
-          <div ref={invoiceRef} className="bg-white text-black p-6 rounded-lg text-[13px]">
-            <div className="header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32 }}>
-              <div>
-                <h1 style={{ fontSize: 24, margin: 0, fontWeight: 700 }}>INVOICE</h1>
-                <p style={{ color: "#888", marginTop: 4 }}>{order.number}</p>
+          {/* A4 invoice canvas — 210mm x 297mm at 96dpi ≈ 794x1123px */}
+          <div className="flex justify-center bg-muted/40 p-4 rounded-lg overflow-x-auto">
+            <div
+              ref={invoiceRef}
+              style={{
+                width: "794px",
+                minHeight: "1123px",
+                background: "#ffffff",
+                color: "#1a1a1a",
+                padding: "56px 64px",
+                position: "relative",
+                fontFamily: "system-ui, -apple-system, sans-serif",
+                fontSize: 13,
+                boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
+                boxSizing: "border-box",
+              }}
+            >
+              {/* Watermark */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  pointerEvents: "none",
+                  zIndex: 0,
+                }}
+              >
+                <img
+                  src={companyLogo}
+                  alt=""
+                  style={{
+                    width: 460,
+                    height: 460,
+                    opacity: 0.06,
+                    transform: "rotate(-18deg)",
+                  }}
+                />
               </div>
-              <div style={{ textAlign: "right" }}>
-                <p style={{ fontWeight: 700 }}>MyStore Inc.</p>
-                <p style={{ color: "#888" }}>742 Evergreen Terrace</p>
-                <p style={{ color: "#888" }}>Portland, OR 97201</p>
-              </div>
-            </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, margin: "24px 0" }}>
-              <div>
-                <h2 style={{ fontSize: 11, textTransform: "uppercase", color: "#888", fontWeight: 600, marginBottom: 8 }}>Bill To</h2>
-                <p style={{ fontWeight: 600 }}>{order.billing.first_name} {order.billing.last_name}</p>
-                {order.billing.company && <p>{order.billing.company}</p>}
-                <p>{order.billing.address_1}</p>
-                <p>{order.billing.city}, {order.billing.state} {order.billing.postcode}</p>
-              </div>
-              <div>
-                <h2 style={{ fontSize: 11, textTransform: "uppercase", color: "#888", fontWeight: 600, marginBottom: 8 }}>Details</h2>
-                <p><strong>Date:</strong> {format(new Date(order.date_created), "MMM d, yyyy")}</p>
-                <p><strong>Payment:</strong> {order.payment_method_title}</p>
-                <p><strong>Status:</strong> {status || order.status}</p>
-              </div>
-            </div>
+              {/* Foreground content */}
+              <div style={{ position: "relative", zIndex: 1 }}>
+                {/* Header with logo */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32, borderBottom: "2px solid #1a1a1a", paddingBottom: 20 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <img src={companyLogo} alt="MyStore" style={{ width: 64, height: 64, objectFit: "contain" }} />
+                    <div>
+                      <p style={{ fontSize: 20, fontWeight: 800, margin: 0, letterSpacing: "-0.5px" }}>MyStore Inc.</p>
+                      <p style={{ color: "#888", margin: "2px 0 0", fontSize: 11 }}>742 Evergreen Terrace, Portland, OR 97201</p>
+                      <p style={{ color: "#888", margin: 0, fontSize: 11 }}>support@mystore.com · +1 (555) 010-2024</p>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <h1 style={{ fontSize: 28, margin: 0, fontWeight: 800, letterSpacing: "-1px" }}>INVOICE</h1>
+                    <p style={{ color: "#888", margin: "4px 0 0", fontSize: 12 }}>{order.number}</p>
+                    <p style={{ color: "#888", margin: 0, fontSize: 11 }}>{format(new Date(order.date_created), "MMM d, yyyy")}</p>
+                  </div>
+                </div>
 
-            <table style={{ width: "100%", borderCollapse: "collapse", margin: "16px 0" }}>
-              <thead>
-                <tr style={{ borderBottom: "2px solid #e5e5e5" }}>
-                  <th style={{ padding: "8px 12px", textAlign: "left", fontSize: 11, textTransform: "uppercase", color: "#888", fontWeight: 600 }}>Item</th>
-                  <th style={{ padding: "8px 12px", textAlign: "left", fontSize: 11, textTransform: "uppercase", color: "#888", fontWeight: 600 }}>SKU</th>
-                  <th style={{ padding: "8px 12px", textAlign: "right", fontSize: 11, textTransform: "uppercase", color: "#888", fontWeight: 600 }}>Qty</th>
-                  <th style={{ padding: "8px 12px", textAlign: "right", fontSize: 11, textTransform: "uppercase", color: "#888", fontWeight: 600 }}>Price</th>
-                  <th style={{ padding: "8px 12px", textAlign: "right", fontSize: 11, textTransform: "uppercase", color: "#888", fontWeight: 600 }}>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {order.line_items.map(item => (
-                  <tr key={item.id} style={{ borderBottom: "1px solid #e5e5e5" }}>
-                    <td style={{ padding: "8px 12px" }}>{item.name}</td>
-                    <td style={{ padding: "8px 12px", color: "#888" }}>{item.sku}</td>
-                    <td style={{ padding: "8px 12px", textAlign: "right" }}>{item.quantity}</td>
-                    <td style={{ padding: "8px 12px", textAlign: "right" }}>${item.price.toFixed(2)}</td>
-                    <td style={{ padding: "8px 12px", textAlign: "right", fontWeight: 600 }}>${(item.price * item.quantity).toFixed(2)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 24, margin: "24px 0" }}>
+                  <div>
+                    <h2 style={{ fontSize: 10, textTransform: "uppercase", color: "#888", fontWeight: 700, marginBottom: 8, letterSpacing: "0.5px" }}>Bill To</h2>
+                    <p style={{ fontWeight: 600, margin: "0 0 2px" }}>{order.billing.first_name} {order.billing.last_name}</p>
+                    {order.billing.company && <p style={{ margin: "0 0 2px" }}>{order.billing.company}</p>}
+                    <p style={{ margin: "0 0 2px", color: "#555" }}>{order.billing.address_1}</p>
+                    <p style={{ margin: 0, color: "#555" }}>{order.billing.city}, {order.billing.state} {order.billing.postcode}</p>
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: 10, textTransform: "uppercase", color: "#888", fontWeight: 700, marginBottom: 8, letterSpacing: "0.5px" }}>Ship To</h2>
+                    <p style={{ fontWeight: 600, margin: "0 0 2px" }}>{order.shipping.first_name} {order.shipping.last_name}</p>
+                    <p style={{ margin: "0 0 2px", color: "#555" }}>{order.shipping.address_1}</p>
+                    <p style={{ margin: 0, color: "#555" }}>{order.shipping.city}, {order.shipping.state} {order.shipping.postcode}</p>
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: 10, textTransform: "uppercase", color: "#888", fontWeight: 700, marginBottom: 8, letterSpacing: "0.5px" }}>Payment</h2>
+                    <p style={{ margin: "0 0 2px" }}><strong>Method:</strong> {order.payment_method_title}</p>
+                    <p style={{ margin: "0 0 2px" }}><strong>Status:</strong> <span style={{ textTransform: "capitalize" }}>{status || order.status}</span></p>
+                    <p style={{ margin: 0 }}><strong>Date:</strong> {format(new Date(order.date_created), "MMM d, yyyy")}</p>
+                  </div>
+                </div>
 
-            <div style={{ marginLeft: "auto", width: 280 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0" }}><span>Subtotal</span><span>${order.subtotal}</span></div>
-              <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0" }}><span>Shipping</span><span>${order.shipping_total}</span></div>
-              <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0" }}><span>Tax</span><span>${order.tax_total}</span></div>
-              {Number(order.discount_total) > 0 && (
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0" }}><span>Discount</span><span>-${order.discount_total}</span></div>
-              )}
-              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0 4px", borderTop: "2px solid #1a1a1a", marginTop: 4, fontWeight: 700 }}>
-                <span>Total</span><span>${order.total}</span>
+                <table style={{ width: "100%", borderCollapse: "collapse", margin: "20px 0" }}>
+                  <thead>
+                    <tr style={{ background: "#f5f5f7" }}>
+                      <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 10, textTransform: "uppercase", color: "#555", fontWeight: 700, letterSpacing: "0.5px" }}>Item</th>
+                      <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 10, textTransform: "uppercase", color: "#555", fontWeight: 700, letterSpacing: "0.5px" }}>SKU</th>
+                      <th style={{ padding: "10px 12px", textAlign: "right", fontSize: 10, textTransform: "uppercase", color: "#555", fontWeight: 700, letterSpacing: "0.5px" }}>Qty</th>
+                      <th style={{ padding: "10px 12px", textAlign: "right", fontSize: 10, textTransform: "uppercase", color: "#555", fontWeight: 700, letterSpacing: "0.5px" }}>Price</th>
+                      <th style={{ padding: "10px 12px", textAlign: "right", fontSize: 10, textTransform: "uppercase", color: "#555", fontWeight: 700, letterSpacing: "0.5px" }}>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {order.line_items.map(item => (
+                      <tr key={item.id} style={{ borderBottom: "1px solid #eee" }}>
+                        <td style={{ padding: "10px 12px" }}>{item.name}</td>
+                        <td style={{ padding: "10px 12px", color: "#888" }}>{item.sku}</td>
+                        <td style={{ padding: "10px 12px", textAlign: "right" }}>{item.quantity}</td>
+                        <td style={{ padding: "10px 12px", textAlign: "right" }}>${item.price.toFixed(2)}</td>
+                        <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 600 }}>${(item.price * item.quantity).toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <div style={{ marginLeft: "auto", width: 300, marginTop: 16 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", color: "#555" }}><span>Subtotal</span><span>${order.subtotal}</span></div>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", color: "#555" }}><span>Shipping</span><span>${order.shipping_total}</span></div>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", color: "#555" }}><span>Tax</span><span>${order.tax_total}</span></div>
+                  {Number(order.discount_total) > 0 && (
+                    <div style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", color: "#0a8f3c" }}><span>Discount</span><span>-${order.discount_total}</span></div>
+                  )}
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0 4px", borderTop: "2px solid #1a1a1a", marginTop: 8, fontWeight: 800, fontSize: 16 }}>
+                    <span>Total</span><span>${order.total}</span>
+                  </div>
+                </div>
+
+                <div style={{ position: "absolute", bottom: 40, left: 64, right: 64, borderTop: "1px solid #e5e5e5", paddingTop: 16, textAlign: "center", color: "#888", fontSize: 10 }}>
+                  Thank you for your business! For questions about this invoice, contact support@mystore.com
+                  <br />
+                  MyStore Inc. · Invoice generated on {format(new Date(), "MMM d, yyyy 'at' h:mm a")}
+                </div>
               </div>
             </div>
           </div>
