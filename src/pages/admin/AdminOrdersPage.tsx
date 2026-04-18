@@ -112,11 +112,82 @@ export default function AdminOrdersPage() {
               </button>
             ))}
           </div>
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search by order # or customer..." className="pl-9 h-9" value={search} onChange={e => setSearch(e.target.value)} />
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Search by order # or customer..." className="pl-9 h-9" value={search} onChange={e => setSearch(e.target.value)} />
+            </div>
+            <Button
+              variant={showFilters || activeFilterCount > 0 ? "default" : "outline"}
+              size="sm"
+              className="h-9 gap-1.5 shrink-0"
+              onClick={() => setShowFilters(v => !v)}
+            >
+              <Filter className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Filters</span>
+              {activeFilterCount > 0 && (
+                <span className="ml-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-background text-foreground text-[10px] font-bold px-1">
+                  {activeFilterCount}
+                </span>
+              )}
+            </Button>
           </div>
         </div>
+
+        {/* Advanced Filter Bar */}
+        {showFilters && (
+          <div className="bg-card rounded-xl border shadow-card p-4 animate-fade-in">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold flex items-center gap-1.5">
+                <Filter className="h-3.5 w-3.5 text-primary" /> Advanced Filters
+              </h3>
+              <div className="flex gap-2">
+                {activeFilterCount > 0 && (
+                  <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={resetFilters}>
+                    <X className="h-3 w-3 mr-1" /> Clear
+                  </Button>
+                )}
+                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setShowFilters(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div>
+                <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Payment Method</label>
+                <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+                  <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {paymentMethods.map(p => (
+                      <SelectItem key={p} value={p} className="text-xs capitalize">{p === "all" ? "All Methods" : p}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-[11px] font-medium text-muted-foreground mb-1 block flex items-center gap-1">
+                  <Calendar className="h-3 w-3" /> Date Range
+                </label>
+                <Select value={dateFilter} onValueChange={setDateFilter}>
+                  <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {dateRanges.map(d => (
+                      <SelectItem key={d.value} value={d.value} className="text-xs">{d.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Min Total ($)</label>
+                <Input type="number" placeholder="0" className="h-9 text-xs" value={minTotal} onChange={e => setMinTotal(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Max Total ($)</label>
+                <Input type="number" placeholder="∞" className="h-9 text-xs" value={maxTotal} onChange={e => setMaxTotal(e.target.value)} />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Bulk actions */}
         {selected.length > 0 && (
