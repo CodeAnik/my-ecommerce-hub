@@ -59,33 +59,46 @@ export default function AdminOrderDetailPage() {
       logging: false,
     });
     const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
     const pageWidth = 210;
     const pageHeight = 297;
     const imgHeight = (canvas.height * pageWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    let position = 0;
-    pdf.addImage(imgData, "PNG", 0, position, pageWidth, imgHeight);
-    heightLeft -= pageHeight;
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, position, pageWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
+    // Scale image so it always fits in a single A4 page (no blank 2nd page from rounding)
+    const finalHeight = Math.min(imgHeight, pageHeight);
+    const finalWidth = imgHeight > pageHeight ? (canvas.width * pageHeight) / canvas.height : pageWidth;
+    const offsetX = (pageWidth - finalWidth) / 2;
+    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+    pdf.addImage(imgData, "PNG", offsetX, 0, finalWidth, finalHeight);
     return pdf;
   };
 
   const printInvoice = async () => {
     const pdf = await renderPdf();
     if (!pdf) return;
-    const blobUrl = pdf.output("bloburl");
-    const win = window.open(blobUrl as unknown as string, "_blank");
-    if (win) {
-      win.focus();
-      setTimeout(() => win.print(), 600);
-    }
-    toast.success("Invoice ready to print");
+    const blobUrl = pdf.output("bloburl") as unknown as string;
+    // Use a hidden iframe so print() can be called reliably (popup blockers + cross-origin issues)
+    let iframe = document.getElementById("invoice-print-frame") as HTMLIFrameElement | null;
+    if (iframe) iframe.remove();
+    iframe = document.createElement("iframe");
+    iframe.id = "invoice-print-frame";
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    iframe.src = blobUrl;
+    document.body.appendChild(iframe);
+    iframe.onload = () => {
+      setTimeout(() => {
+        try {
+          iframe!.contentWindow?.focus();
+          iframe!.contentWindow?.print();
+        } catch {
+          window.open(blobUrl, "_blank");
+        }
+      }, 300);
+    };
+    toast.success("Opening print dialog…");
   };
 
   const downloadInvoice = async () => {
