@@ -246,6 +246,8 @@ export default function AdminOrderDetailPage() {
                 fontSize: 13,
                 boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
                 boxSizing: "border-box",
+                display: "flex",
+                flexDirection: "column",
               }}
             >
               {/* Watermark */}
