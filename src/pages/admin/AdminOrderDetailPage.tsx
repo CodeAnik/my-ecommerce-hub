@@ -49,55 +49,50 @@ export default function AdminOrderDetailPage() {
     setInvoiceOpen(true);
   };
 
-  const printInvoice = () => {
+  const renderPdf = async (): Promise<jsPDF | null> => {
     const content = invoiceRef.current;
-    if (!content) return;
-    const win = window.open("", "_blank");
-    if (!win) return;
-    win.document.write(`<!DOCTYPE html><html><head><title>Invoice ${order.number}</title>
-      <style>
-        body{font-family:system-ui,sans-serif;margin:0;padding:40px;color:#1a1a1a;font-size:13px}
-        h1{font-size:24px;margin:0}h2{font-size:14px;margin:0 0 8px}
-        table{width:100%;border-collapse:collapse;margin:16px 0}
-        th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #e5e5e5}
-        th{font-size:11px;text-transform:uppercase;color:#888;font-weight:600}
-        .text-right{text-align:right}.bold{font-weight:700}
-        .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px}
-        .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:24px 0}
-        .totals{margin-left:auto;width:280px}.totals div{display:flex;justify-content:space-between;padding:4px 0}
-        .totals .total-row{border-top:2px solid #1a1a1a;padding-top:8px;margin-top:4px;font-weight:700}
-        @media print{body{padding:20px}button{display:none!important}}
-      </style>
-    </head><body>${content.innerHTML}</body></html>`);
-    win.document.close();
-    win.print();
+    if (!content) return null;
+    const canvas = await html2canvas(content, {
+      scale: 2,
+      backgroundColor: "#ffffff",
+      useCORS: true,
+      logging: false,
+    });
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
+    pdf.addImage(imgData, "PNG", 0, position, pageWidth, imgHeight);
+    heightLeft -= pageHeight;
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, pageWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+    return pdf;
   };
 
-  const downloadInvoice = () => {
-    const content = invoiceRef.current;
-    if (!content) return;
-    const html = `<!DOCTYPE html><html><head><title>Invoice ${order.number}</title>
-      <style>
-        body{font-family:system-ui,sans-serif;margin:0;padding:40px;color:#1a1a1a;font-size:13px}
-        h1{font-size:24px;margin:0}h2{font-size:14px;margin:0 0 8px}
-        table{width:100%;border-collapse:collapse;margin:16px 0}
-        th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #e5e5e5}
-        th{font-size:11px;text-transform:uppercase;color:#888;font-weight:600}
-        .text-right{text-align:right}.bold{font-weight:700}
-        .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px}
-        .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:24px 0}
-        .totals{margin-left:auto;width:280px}.totals div{display:flex;justify-content:space-between;padding:4px 0}
-        .totals .total-row{border-top:2px solid #1a1a1a;padding-top:8px;margin-top:4px;font-weight:700}
-      </style>
-    </head><body>${content.innerHTML}</body></html>`;
-    const blob = new Blob([html], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Invoice-${order.number.replace("#", "")}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Invoice downloaded");
+  const printInvoice = async () => {
+    const pdf = await renderPdf();
+    if (!pdf) return;
+    const blobUrl = pdf.output("bloburl");
+    const win = window.open(blobUrl as unknown as string, "_blank");
+    if (win) {
+      win.focus();
+      setTimeout(() => win.print(), 600);
+    }
+    toast.success("Invoice ready to print");
+  };
+
+  const downloadInvoice = async () => {
+    const pdf = await renderPdf();
+    if (!pdf) return;
+    pdf.save(`Invoice-${order.number.replace("#", "")}.pdf`);
+    toast.success("Invoice PDF downloaded");
   };
 
   return (
