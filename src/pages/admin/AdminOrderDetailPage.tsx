@@ -13,6 +13,9 @@ import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import companyLogo from "@/assets/company-logo.png";
 
 const allStatuses: OrderStatus[] = ["pending", "processing", "on-hold", "completed", "cancelled", "refunded"];
 
