@@ -275,7 +275,7 @@ export default function AdminOrderDetailPage() {
               </div>
 
               {/* Foreground content */}
-              <div style={{ position: "relative", zIndex: 1 }}>
+              <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", flex: 1 }}>
                 {/* Header with logo */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32, borderBottom: "2px solid #1a1a1a", paddingBottom: 20 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
