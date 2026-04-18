@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
@@ -18,10 +18,15 @@ const allStatuses: OrderStatus[] = ["pending", "processing", "on-hold", "complet
 
 export default function AdminOrderDetailPage() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const order = mockOrders.find(o => o.id === Number(id));
   const [status, setStatus] = useState<OrderStatus | undefined>(order?.status);
   const [invoiceOpen, setInvoiceOpen] = useState(false);
   const invoiceRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (searchParams.get("invoice") === "1") setInvoiceOpen(true);
+  }, [searchParams]);
 
   if (!order) {
     return (
