@@ -48,14 +48,31 @@ export default function AdminOrdersPage() {
     toast.success(`Order status updated to "${newStatus}"`);
   };
 
-  const filtered = orders.filter(o => {
+  const filtered = useMemo(() => orders.filter(o => {
     if (activeTab !== "all" && o.status !== activeTab) return false;
     if (search) {
       const s = search.toLowerCase();
-      return o.number.toLowerCase().includes(s) || (o.customer_name || "").toLowerCase().includes(s);
+      if (!(o.number.toLowerCase().includes(s) || (o.customer_name || "").toLowerCase().includes(s))) return false;
     }
+    if (paymentFilter !== "all" && !o.payment_method_title.toLowerCase().includes(paymentFilter.toLowerCase())) return false;
+    if (dateFilter !== "all") {
+      const days = dateFilter === "today" ? 1 : dateFilter === "7d" ? 7 : 30;
+      const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+      if (new Date(o.date_created).getTime() < cutoff) return false;
+    }
+    const total = parseFloat(o.total);
+    if (minTotal && total < parseFloat(minTotal)) return false;
+    if (maxTotal && total > parseFloat(maxTotal)) return false;
     return true;
-  });
+  }), [orders, activeTab, search, paymentFilter, dateFilter, minTotal, maxTotal]);
+
+  const activeFilterCount = [
+    paymentFilter !== "all", dateFilter !== "all", !!minTotal, !!maxTotal,
+  ].filter(Boolean).length;
+
+  const resetFilters = () => {
+    setPaymentFilter("all"); setDateFilter("all"); setMinTotal(""); setMaxTotal("");
+  };
 
   const toggleSelect = (id: number) => {
     setSelected(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
