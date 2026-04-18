@@ -244,10 +244,10 @@ export default function AdminOrdersPage() {
                     <td className="px-3 py-3 hidden sm:table-cell">
                       <span className="text-muted-foreground">{order.customer_name || "Guest"}</span>
                     </td>
-                    <td className="px-3 py-3 text-muted-foreground text-xs">{format(new Date(order.date_created), "MMM d, yyyy")}</td>
+                    <td className="px-3 py-3 text-muted-foreground text-xs hidden md:table-cell">{format(new Date(order.date_created), "MMM d, yyyy")}</td>
                     <td className="px-3 py-3">
                       <Select value={order.status} onValueChange={(v) => handleStatusChange(order.id, v as OrderStatus)}>
-                        <SelectTrigger className="h-7 w-[120px] text-[11px] border-dashed">
+                        <SelectTrigger className="h-7 w-[110px] text-[11px] border-dashed">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -257,18 +257,31 @@ export default function AdminOrdersPage() {
                         </SelectContent>
                       </Select>
                     </td>
-                    <td className="px-3 py-3 text-muted-foreground text-xs hidden md:table-cell">{order.payment_method_title.split('(')[0].trim()}</td>
-                    <td className="px-3 py-3 text-right font-semibold">${order.total}</td>
-                    <td className="px-3 py-3 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="h-4 w-4" /></Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => navigate(`/admin/orders/${order.id}`)}><Eye className="h-3.5 w-3.5 mr-2" /> View Details</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => navigate(`/admin/orders/${order.id}`)}><Printer className="h-3.5 w-3.5 mr-2" /> Print Invoice</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                    <td className="px-3 py-3 text-muted-foreground text-xs hidden lg:table-cell">{order.payment_method_title.split('(')[0].trim()}</td>
+                    <td className="px-3 py-3 text-right font-semibold whitespace-nowrap">${order.total}</td>
+                    <td className="px-3 py-3">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 px-2 text-[11px] gap-1"
+                          onClick={() => navigate(`/admin/orders/${order.id}`)}
+                          title="View Order"
+                        >
+                          <Eye className="h-3 w-3" />
+                          <span className="hidden md:inline">View</span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 px-2 text-[11px] gap-1"
+                          onClick={() => navigate(`/admin/orders/${order.id}?invoice=1`)}
+                          title="Print Invoice"
+                        >
+                          <Printer className="h-3 w-3" />
+                          <span className="hidden md:inline">Invoice</span>
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
