@@ -213,11 +213,11 @@ export default function AdminOrdersPage() {
                   </th>
                   <th className="px-3 py-3 text-left font-medium text-xs text-muted-foreground">Order</th>
                   <th className="px-3 py-3 text-left font-medium text-xs text-muted-foreground hidden sm:table-cell">Customer</th>
-                  <th className="px-3 py-3 text-left font-medium text-xs text-muted-foreground">Date</th>
+                  <th className="px-3 py-3 text-left font-medium text-xs text-muted-foreground hidden md:table-cell">Date</th>
                   <th className="px-3 py-3 text-left font-medium text-xs text-muted-foreground">Status</th>
-                  <th className="px-3 py-3 text-left font-medium text-xs text-muted-foreground hidden md:table-cell">Payment</th>
+                  <th className="px-3 py-3 text-left font-medium text-xs text-muted-foreground hidden lg:table-cell">Payment</th>
                   <th className="px-3 py-3 text-right font-medium text-xs text-muted-foreground">Total</th>
-                  <th className="px-3 py-3 text-right font-medium text-xs text-muted-foreground w-12"></th>
+                  <th className="px-3 py-3 text-right font-medium text-xs text-muted-foreground">Action</th>
                 </tr>
               </thead>
               <tbody>
