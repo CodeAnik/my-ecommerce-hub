@@ -11,6 +11,7 @@ import {
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { ImportExportMenu } from "@/components/admin/ImportExportMenu";
 
 const tabs = [
   { label: "All", value: "all" },

@@ -15,6 +15,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ProductFormDialog, type ProductFormValue } from "@/components/admin/ProductFormDialog";
+import { ImportExportMenu } from "@/components/admin/ImportExportMenu";
 
 const tabs = [
   { label: "All", value: "all" },
