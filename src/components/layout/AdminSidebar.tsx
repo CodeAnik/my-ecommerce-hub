@@ -19,7 +19,7 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
     { label: "Overview", icon: LayoutDashboard, path: "/admin", permission: null },
     { label: "Orders", icon: ShoppingBag, path: "/admin/orders", permission: "manage_orders" },
     { label: "Products", icon: Package, path: "/admin/products", permission: "manage_products" },
-    { label: "Customers", icon: Users, path: "/admin/customers", permission: "manage_customers" },
+    { label: "Users", icon: Users, path: "/admin/users", permission: "manage_customers" },
     { label: "Analytics", icon: BarChart3, path: "/admin/analytics", permission: "view_analytics" },
     { label: "Coupons", icon: Tag, path: "/admin/coupons", permission: "manage_products" },
     { label: "Settings", icon: Settings, path: "/admin/settings", permission: "manage_settings" },
