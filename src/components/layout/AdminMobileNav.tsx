@@ -17,7 +17,7 @@ export function AdminMobileNav() {
   const [showMore, setShowMore] = useState(false);
 
   const moreItems = [
-    hasPermission("manage_customers") && { label: "Customers", icon: Users, path: "/admin/customers" },
+    hasPermission("manage_customers") && { label: "Users", icon: Users, path: "/admin/users" },
     hasPermission("manage_products") && { label: "Coupons", icon: Tag, path: "/admin/coupons" },
     hasPermission("manage_settings") && { label: "Settings", icon: Settings, path: "/admin/settings" },
   ].filter(Boolean) as { label: string; icon: React.ElementType; path: string }[];
