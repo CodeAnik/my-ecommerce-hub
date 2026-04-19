@@ -132,6 +132,51 @@ export default function AdminOrdersPage() {
                 </span>
               )}
             </Button>
+            <ImportExportMenu
+              filenameBase="orders"
+              getExportRows={() => orders.map(o => ({
+                id: o.id, number: o.number, status: o.status,
+                date_created: o.date_created, date_completed: o.date_completed || "",
+                customer_id: o.customer_id || "", customer_name: o.customer_name || "",
+                payment_method: o.payment_method_title,
+                subtotal: o.subtotal, shipping_total: o.shipping_total,
+                tax_total: o.tax_total, discount_total: o.discount_total, total: o.total,
+                items_count: o.line_items.length,
+                items: o.line_items.map(i => `${i.quantity}x ${i.name} (${i.sku})`).join(" | "),
+                tracking_number: o.tracking_number || "",
+                customer_note: o.customer_note,
+              }))}
+              onImport={(rows) => {
+                const validStatuses: OrderStatus[] = ["pending","processing","on-hold","completed","cancelled","refunded","failed"];
+                let nextId = Math.max(0, ...orders.map(o => o.id)) + 1;
+                const imported = rows.map((r, i) => {
+                  const id = typeof r.id === "number" ? r.id : nextId + i;
+                  const status = validStatuses.includes(r.status) ? r.status as OrderStatus : "pending";
+                  return {
+                    id, number: String(r.number || `#${id}`), status,
+                    date_created: String(r.date_created || new Date().toISOString()),
+                    date_completed: r.date_completed ? String(r.date_completed) : null,
+                    total: String(r.total ?? "0.00"), subtotal: String(r.subtotal ?? "0.00"),
+                    shipping_total: String(r.shipping_total ?? "0.00"),
+                    tax_total: String(r.tax_total ?? "0.00"),
+                    discount_total: String(r.discount_total ?? "0.00"),
+                    payment_method_title: String(r.payment_method || "Imported"),
+                    customer_id: typeof r.customer_id === "number" ? r.customer_id : undefined,
+                    customer_name: String(r.customer_name || "Imported Customer"),
+                    line_items: [], billing: mockOrders[0].billing, shipping: mockOrders[0].shipping,
+                    customer_note: String(r.customer_note || ""),
+                    tracking_number: r.tracking_number ? String(r.tracking_number) : undefined,
+                    timeline: [{ date: new Date().toISOString(), status: "Imported", note: "Imported from file" }],
+                  };
+                });
+                setOrders(prev => {
+                  const byId = new Map(prev.map(o => [o.id, o]));
+                  imported.forEach(o => byId.set(o.id, o));
+                  return Array.from(byId.values()).sort((a, b) => b.id - a.id);
+                });
+                return imported.length;
+              }}
+            />
           </div>
         </div>
 

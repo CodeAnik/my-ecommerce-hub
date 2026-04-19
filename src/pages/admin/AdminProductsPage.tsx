@@ -110,6 +110,42 @@ export default function AdminProductsPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Search products..." className="pl-9 h-9" value={search} onChange={e => setSearch(e.target.value)} />
             </div>
+            <ImportExportMenu
+              filenameBase="products"
+              getExportRows={() => products.map(p => ({
+                id: p.id, name: p.name, sku: p.sku || "", category: p.category,
+                regular_price: p.regular_price, sale_price: p.sale_price || "",
+                price: p.price, stock_status: p.stock_status || "instock",
+                stock_quantity: p.stock_quantity ?? 0, status: p.status || "publish",
+                total_sales: p.total_sales ?? 0, image: p.image,
+                date_created: p.date_created || "",
+              }))}
+              onImport={(rows) => {
+                let nextId = Math.max(0, ...products.map(p => p.id)) + 1;
+                const imported = rows.map((r, i) => ({
+                  id: typeof r.id === "number" ? r.id : nextId + i,
+                  name: String(r.name || "Untitled"),
+                  sku: String(r.sku || ""),
+                  category: String(r.category || "Uncategorized"),
+                  regular_price: String(r.regular_price ?? r.price ?? "0"),
+                  sale_price: String(r.sale_price || ""),
+                  price: String(r.sale_price || r.price || r.regular_price || "0"),
+                  stock_status: (["instock","outofstock","onbackorder"].includes(r.stock_status) ? r.stock_status : "instock") as any,
+                  stock_quantity: Number(r.stock_quantity) || 0,
+                  status: (["publish","draft","pending"].includes(r.status) ? r.status : "publish") as any,
+                  total_sales: Number(r.total_sales) || 0,
+                  image: String(r.image || "/placeholder.svg"),
+                  rating: 0,
+                  date_created: String(r.date_created || new Date().toISOString().split("T")[0]),
+                }));
+                setProducts(prev => {
+                  const byId = new Map(prev.map(p => [p.id, p]));
+                  imported.forEach(p => byId.set(p.id, p as any));
+                  return Array.from(byId.values());
+                });
+                return imported.length;
+              }}
+            />
             <Button size="sm" className="gradient-primary text-primary-foreground h-9" onClick={openCreate}>
               <Plus className="h-4 w-4 mr-1" /> Add Product
             </Button>
