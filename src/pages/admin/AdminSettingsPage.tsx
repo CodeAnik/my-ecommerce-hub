@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,19 +7,53 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Store, Globe, CreditCard, Truck, Bell, Shield, Save } from "lucide-react";
+import { Store, CreditCard, Truck, Bell, Shield, Save, Home, FileText, MessageSquare, Layers, Database, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SiteSettingsPanel } from "@/components/admin/settings/SiteSettingsPanel";
+import { HomepagePanel } from "@/components/admin/settings/HomepagePanel";
+import { PoliciesPanel } from "@/components/admin/settings/PoliciesPanel";
+import { ContactPanel } from "@/components/admin/settings/ContactPanel";
+import { ReviewsPanel } from "@/components/admin/settings/ReviewsPanel";
+import { PresetsPanel } from "@/components/admin/settings/PresetsPanel";
+import { ClonePanel } from "@/components/admin/settings/ClonePanel";
 
-const settingsSections = [
-  { id: "general", label: "General", icon: Store },
-  { id: "payments", label: "Payments", icon: CreditCard },
-  { id: "shipping", label: "Shipping", icon: Truck },
-  { id: "notifications", label: "Notifications", icon: Bell },
-  { id: "security", label: "Security", icon: Shield },
+type SectionId = "site" | "homepage" | "policies" | "contact" | "reviews" | "presets" | "clone" | "payments" | "shipping" | "notifications" | "security";
+
+interface SettingsSection {
+  id: SectionId;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  group: string;
+  adminOnly?: boolean;
+}
+
+const ALL_SECTIONS: SettingsSection[] = [
+  { id: "site", label: "Site Settings", icon: Store, group: "Branding" },
+  { id: "presets", label: "Branding Presets", icon: Layers, group: "Branding" },
+
+  { id: "homepage", label: "Homepage", icon: Home, group: "Content" },
+  { id: "policies", label: "Policy Pages", icon: FileText, group: "Content" },
+  { id: "contact", label: "Contact Page", icon: Mail, group: "Content" },
+  { id: "reviews", label: "Reviews", icon: MessageSquare, group: "Content" },
+
+  { id: "payments", label: "Payments", icon: CreditCard, group: "System", adminOnly: true },
+  { id: "shipping", label: "Shipping", icon: Truck, group: "System", adminOnly: true },
+  { id: "notifications", label: "Notifications", icon: Bell, group: "System", adminOnly: true },
+  { id: "security", label: "Security", icon: Shield, group: "System", adminOnly: true },
+  { id: "clone", label: "Clone / Template", icon: Database, group: "System", adminOnly: true },
 ];
 
 export default function AdminSettingsPage() {
-  const [activeSection, setActiveSection] = useState("general");
+  const { role } = useAuth();
+  const isAdmin = role === "administrator";
+  const sections = useMemo(() => ALL_SECTIONS.filter(s => isAdmin || !s.adminOnly), [isAdmin]);
+  const [activeSection, setActiveSection] = useState<SectionId>("site");
+
+  const groups = useMemo(() => {
+    const map = new Map<string, SettingsSection[]>();
+    sections.forEach(s => { if (!map.has(s.group)) map.set(s.group, []); map.get(s.group)!.push(s); });
+    return Array.from(map.entries());
+  }, [sections]);
 
   return (
     <>
@@ -26,67 +61,41 @@ export default function AdminSettingsPage() {
       <div className="p-4 lg:p-6 animate-fade-in">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar nav */}
-          <div className="lg:w-56 shrink-0">
+          <aside className="lg:w-60 shrink-0">
             <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
-              {settingsSections.map(s => (
-                <button key={s.id} onClick={() => setActiveSection(s.id)}
-                  className={cn("flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors",
-                    activeSection === s.id ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted")}>
-                  <s.icon className="h-4 w-4 shrink-0" />
-                  <span>{s.label}</span>
-                </button>
+              {groups.map(([group, items]) => (
+                <div key={group} className="lg:space-y-1 flex lg:block gap-1">
+                  <p className="hidden lg:block text-[10px] uppercase tracking-wider font-semibold text-muted-foreground px-3 pt-3 pb-1">{group}</p>
+                  {items.map(s => (
+                    <button key={s.id} onClick={() => setActiveSection(s.id)}
+                      className={cn("flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors w-full",
+                        activeSection === s.id ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted")}>
+                      <s.icon className="h-4 w-4 shrink-0" />
+                      <span>{s.label}</span>
+                    </button>
+                  ))}
+                </div>
               ))}
             </nav>
-          </div>
+            {!isAdmin && (
+              <p className="hidden lg:block mt-4 px-3 text-xs text-muted-foreground italic">Editor mode — system settings hidden.</p>
+            )}
+          </aside>
 
           {/* Content */}
-          <div className="flex-1 max-w-2xl">
-            {activeSection === "general" && (
-              <div className="bg-card rounded-xl border p-6 shadow-card space-y-6">
-                <div>
-                  <h3 className="text-base font-semibold mb-1">Store Information</h3>
-                  <p className="text-sm text-muted-foreground">Basic store settings and branding</p>
-                </div>
-                <Separator />
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Store Name</Label>
-                    <Input defaultValue="MyStore" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Store URL</Label>
-                    <div className="flex items-center gap-2">
-                      <Globe className="h-4 w-4 text-muted-foreground" />
-                      <Input defaultValue="https://mystore.com" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Store Email</Label>
-                    <Input defaultValue="hello@mystore.com" type="email" />
-                  </div>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Currency</Label>
-                      <Input defaultValue="USD ($)" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Timezone</Label>
-                      <Input defaultValue="America/New_York" />
-                    </div>
-                  </div>
-                </div>
-                <div className="flex justify-end pt-2">
-                  <Button className="gradient-primary text-primary-foreground" onClick={() => toast.success("Settings saved")}>
-                    <Save className="h-4 w-4 mr-2" /> Save Changes
-                  </Button>
-                </div>
-              </div>
-            )}
+          <div className="flex-1 min-w-0 max-w-4xl">
+            {activeSection === "site" && <SiteSettingsPanel />}
+            {activeSection === "homepage" && <HomepagePanel />}
+            {activeSection === "policies" && <PoliciesPanel />}
+            {activeSection === "contact" && <ContactPanel />}
+            {activeSection === "reviews" && <ReviewsPanel />}
+            {activeSection === "presets" && <PresetsPanel />}
+            {activeSection === "clone" && isAdmin && <ClonePanel />}
 
-            {activeSection === "payments" && (
+            {activeSection === "payments" && isAdmin && (
               <div className="bg-card rounded-xl border p-6 shadow-card space-y-6">
                 <div>
-                  <h3 className="text-base font-semibold mb-1">Payment Methods</h3>
+                  <h3 className="text-base font-semibold mb-1">Payment methods</h3>
                   <p className="text-sm text-muted-foreground">Configure payment gateways</p>
                 </div>
                 <Separator />
@@ -107,10 +116,10 @@ export default function AdminSettingsPage() {
               </div>
             )}
 
-            {activeSection === "shipping" && (
+            {activeSection === "shipping" && isAdmin && (
               <div className="bg-card rounded-xl border p-6 shadow-card space-y-6">
                 <div>
-                  <h3 className="text-base font-semibold mb-1">Shipping Zones</h3>
+                  <h3 className="text-base font-semibold mb-1">Shipping zones</h3>
                   <p className="text-sm text-muted-foreground">Manage shipping methods and rates</p>
                 </div>
                 <Separator />
@@ -130,19 +139,19 @@ export default function AdminSettingsPage() {
               </div>
             )}
 
-            {activeSection === "notifications" && (
+            {activeSection === "notifications" && isAdmin && (
               <div className="bg-card rounded-xl border p-6 shadow-card space-y-6">
                 <div>
-                  <h3 className="text-base font-semibold mb-1">Email Notifications</h3>
+                  <h3 className="text-base font-semibold mb-1">Email notifications</h3>
                   <p className="text-sm text-muted-foreground">Manage notification preferences</p>
                 </div>
                 <Separator />
                 {[
-                  { name: "New Order", desc: "Receive when a new order is placed", enabled: true },
-                  { name: "Order Status Change", desc: "When order status changes", enabled: true },
-                  { name: "Low Stock", desc: "When product stock is low", enabled: true },
-                  { name: "New Customer", desc: "When new customer registers", enabled: false },
-                  { name: "Product Review", desc: "When product gets reviewed", enabled: false },
+                  { name: "New order", desc: "Receive when a new order is placed", enabled: true },
+                  { name: "Order status change", desc: "When order status changes", enabled: true },
+                  { name: "Low stock", desc: "When product stock is low", enabled: true },
+                  { name: "New customer", desc: "When new customer registers", enabled: false },
+                  { name: "Product review", desc: "When product gets reviewed", enabled: false },
                 ].map(n => (
                   <div key={n.name} className="flex items-center justify-between p-3">
                     <div>
@@ -155,35 +164,27 @@ export default function AdminSettingsPage() {
               </div>
             )}
 
-            {activeSection === "security" && (
+            {activeSection === "security" && isAdmin && (
               <div className="bg-card rounded-xl border p-6 shadow-card space-y-6">
                 <div>
-                  <h3 className="text-base font-semibold mb-1">Security Settings</h3>
+                  <h3 className="text-base font-semibold mb-1">Security settings</h3>
                   <p className="text-sm text-muted-foreground">Manage store security</p>
                 </div>
                 <Separator />
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3">
-                    <div>
-                      <p className="text-sm font-medium">Two-Factor Authentication</p>
-                      <p className="text-xs text-muted-foreground">Require 2FA for admin login</p>
+                  {[
+                    { name: "Two-Factor Authentication", desc: "Require 2FA for admin login", checked: false },
+                    { name: "SSL Enforcement", desc: "Force HTTPS on all pages", checked: true },
+                    { name: "Login Rate Limiting", desc: "Limit login attempts", checked: true },
+                  ].map(item => (
+                    <div key={item.name} className="flex items-center justify-between p-3">
+                      <div>
+                        <p className="text-sm font-medium">{item.name}</p>
+                        <p className="text-xs text-muted-foreground">{item.desc}</p>
+                      </div>
+                      <Switch defaultChecked={item.checked} />
                     </div>
-                    <Switch />
-                  </div>
-                  <div className="flex items-center justify-between p-3">
-                    <div>
-                      <p className="text-sm font-medium">SSL Enforcement</p>
-                      <p className="text-xs text-muted-foreground">Force HTTPS on all pages</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between p-3">
-                    <div>
-                      <p className="text-sm font-medium">Login Rate Limiting</p>
-                      <p className="text-xs text-muted-foreground">Limit login attempts</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
+                  ))}
                 </div>
               </div>
             )}
