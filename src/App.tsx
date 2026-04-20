@@ -1,9 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { StoreSettingsProvider } from "@/contexts/StoreSettingsContext";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { RoleRedirect } from "@/components/auth/RoleRedirect";
@@ -28,6 +29,11 @@ import AdminAnalyticsPage from "./pages/admin/AdminAnalyticsPage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import AdminCouponsPage from "./pages/admin/AdminCouponsPage";
 import AdminOrderDetailPage from "./pages/admin/AdminOrderDetailPage";
+import { Navigate } from "react-router-dom";
+import { StorefrontLayout } from "./pages/storefront/StorefrontLayout";
+import HomePage from "./pages/storefront/HomePage";
+import ContactPage from "./pages/storefront/ContactPage";
+import PolicyPage from "./pages/storefront/PolicyPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,50 +41,60 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <StoreSettingsProvider>
+        <AuthProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Public storefront */}
+              <Route element={<StorefrontLayout />}>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/terms" element={<PolicyPage />} />
+                <Route path="/privacy" element={<PolicyPage />} />
+                <Route path="/returns" element={<PolicyPage />} />
+                <Route path="/shipping" element={<PolicyPage />} />
+              </Route>
 
-            {/* Role-based redirect after login */}
-            <Route path="/redirect" element={<RoleRedirect />} />
+              {/* Auth */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/redirect" element={<RoleRedirect />} />
 
-            {/* Customer dashboard - only for customers */}
-            <Route path="/dashboard" element={<DashboardLayout />}>
-              <Route index element={<DashboardHome />} />
-              <Route path="orders" element={<OrdersPage />} />
-              <Route path="orders/:id" element={<OrderDetailPage />} />
-              <Route path="downloads" element={<DownloadsPage />} />
-              <Route path="addresses" element={<AddressesPage />} />
-              <Route path="account" element={<AccountDetailsPage />} />
-              <Route path="wishlist" element={<WishlistPage />} />
-              <Route path="support" element={<SupportPage />} />
-            </Route>
+              {/* Customer dashboard */}
+              <Route path="/dashboard" element={<DashboardLayout />}>
+                <Route index element={<DashboardHome />} />
+                <Route path="orders" element={<OrdersPage />} />
+                <Route path="orders/:id" element={<OrderDetailPage />} />
+                <Route path="downloads" element={<DownloadsPage />} />
+                <Route path="addresses" element={<AddressesPage />} />
+                <Route path="account" element={<AccountDetailsPage />} />
+                <Route path="wishlist" element={<WishlistPage />} />
+                <Route path="support" element={<SupportPage />} />
+              </Route>
 
-            {/* Admin panel - for admin, editor, shop_manager */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminHome />} />
-              <Route path="orders" element={<AdminOrdersPage />} />
-              <Route path="orders/:id" element={<AdminOrderDetailPage />} />
-              <Route path="products" element={<AdminProductsPage />} />
-              <Route path="users" element={<AdminUsersPage />} />
-              <Route path="customers" element={<Navigate to="/admin/users" replace />} />
-              <Route path="customers/:id" element={<AdminCustomerDetailPage />} />
-              <Route path="analytics" element={<AdminAnalyticsPage />} />
-              <Route path="coupons" element={<AdminCouponsPage />} />
-              <Route path="settings" element={<AdminSettingsPage />} />
-            </Route>
+              {/* Admin */}
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminHome />} />
+                <Route path="orders" element={<AdminOrdersPage />} />
+                <Route path="orders/:id" element={<AdminOrderDetailPage />} />
+                <Route path="products" element={<AdminProductsPage />} />
+                <Route path="users" element={<AdminUsersPage />} />
+                <Route path="customers" element={<Navigate to="/admin/users" replace />} />
+                <Route path="customers/:id" element={<AdminCustomerDetailPage />} />
+                <Route path="analytics" element={<AdminAnalyticsPage />} />
+                <Route path="coupons" element={<AdminCouponsPage />} />
+                <Route path="settings" element={<AdminSettingsPage />} />
+              </Route>
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </StoreSettingsProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
